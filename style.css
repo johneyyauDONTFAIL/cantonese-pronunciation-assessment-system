@@ -1,0 +1,43 @@
+.phoneme-list {
+    margin: 20px 0;
+}
+
+.phoneme-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fafafa;
+}
+
+.phoneme-item.perfect {
+    border-left: 5px solid #4CAF50;
+    background: #e8f5e8;
+}
+
+.phoneme-item.error {
+    border-left: 5px solid #F44336;
+    background: #ffebee;
+}
+
+.phoneme-header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.emoji {
+    font-size: 24px;
+}
+
+.score {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.phoneme-details {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+}
