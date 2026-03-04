@@ -87,21 +87,43 @@ form.addEventListener('submit', async (e) => {
 
         resultDiv.innerHTML = `
             <h2>GOPMaxLogit Analysis</h2>
+                <p>Model Output: ${data.model_output}</p>
             <h3>Phoneme Details</h3>
-            <div class="phoneme-list">
+            <div class="list">
                 ${data.phonemes.map(phoneme => `
-                    <div class="phoneme-item ${phoneme.confidence}">
-                        <div class="phoneme-header">
-                            <strong>${phoneme.jyutping} recognized:${phoneme.actual_output}</strong> 
+                    <div class="item ${phoneme.confidence}">
+                        <div class="item-header">
                             <span class="score">${formatScore(phoneme.gop_maxlogit)}</span>
+                            <span class="label">${phoneme.jyutping}</span>
                         </div>
-                        <div class="phoneme-details">
-                            <span>Confidence: ${phoneme.confidence}</span>
+                        <div class="item-details">
+                            <p>Other Predictions:</p>
+                            <ol>
+                                ${phoneme.prediction.map(pred => `<li>${pred[0]}: ${formatScore(pred[1])}</li>`).join('')}
+                            </ol>
                         </div>
                     </div>
                 `).join('')}
             </div>
-            
+            <div>
+                <h3>Tone Details</h3>
+                <div class="list">
+                    ${data.tones.map(tone => `
+                        <div class="item ${tone.confidence}">
+                            <div class="item-header">
+                                <span class="score">${formatScore(tone.gop_maxlogit)}</span>
+                                <span class="label">${tone.tone}</span>
+                            </div>
+                            <div class="item-details">
+                                <p>Other Predictions:</p>
+                                <ol>
+                                    ${tone.prediction.map(pred => `<li>${pred[0]}: ${formatScore(pred[1])}</li>`).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
             <details>
                 <summary>Raw JSON</summary>
                 <pre>${JSON.stringify(data, null, 2)}</pre>

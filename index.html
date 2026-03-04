@@ -54,14 +54,14 @@
             line-height: 1.5;
         }
 
-        .phoneme-list {
+        .list {
             display: flex;
             flex-direction: row;
             gap: 12px;
             margin: 20px 0;
         }
 
-        .phoneme-item {
+        .item {
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 16px;
@@ -69,34 +69,34 @@
             transition: all 0.2s ease;
         }
 
-        .phoneme-item:hover {
+        .item:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transform: translateY(-1px);
         }
 
-        .phoneme-item.perfect {
+        .item.perfect {
             border-left: 5px solid #4CAF50;
             background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
         }
 
-        .phoneme-item.warning {
+        .item.warning {
             border-left: 5px solid #d3fc3f;
             background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
         }
 
-        .phoneme-item.error {
+        .item.error {
             border-left: 5px solid #F44336;
             background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
         }
 
-        .phoneme-header {
+        .item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
         }
 
-        .phoneme-header strong {
+        .item-header strong {
             font-size: 18px;
             color: #1a1a1a;
         }
@@ -110,7 +110,7 @@
             border-radius: 20px;
         }
 
-        .phoneme-details {
+        .item-details {
             font-size: 14px;
             color: #666;
             padding: 4px 0;

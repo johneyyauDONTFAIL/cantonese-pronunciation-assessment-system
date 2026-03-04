@@ -3,3 +3,7 @@
 /wav2vec2bert-jyutping/
 /.vscode
 /__pycache__
+/audio
+/test_dev.py
+/logger_dev.txt
+/evaluation.py

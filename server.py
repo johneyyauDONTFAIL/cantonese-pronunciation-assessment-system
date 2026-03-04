@@ -31,7 +31,7 @@ def evaluate():
     
     file_extension = os.path.splitext(secure_filename(file.filename))[1]
     unique_filename = f"audio_{uuid.uuid4().hex}{file_extension}"
-    audio_path = os.path.join(os.path.dirname(__file__), unique_filename)
+    audio_path = os.path.join(os.path.dirname(__file__), "audio", unique_filename)
     
     file.save(audio_path)
     print(f"Saved audio file: {audio_path}")
@@ -47,7 +47,7 @@ def evaluate():
             print("Inference script returned no output")
             return jsonify({"error": "Inference script returned no output"}), 500
         
-        return jsonify(lines), 200, {'Content-Type': 'application/json'}
+        return jsonify(json_data), 200, {'Content-Type': 'application/json'}
     except subprocess.CalledProcessError as e:
         print(f"Subprocess error: {e.output}")
         return jsonify({"error": f"Script execution failed: {e.output}"}), 500
