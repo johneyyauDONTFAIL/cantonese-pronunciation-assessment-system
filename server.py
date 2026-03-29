@@ -55,9 +55,9 @@ def evaluate():
         print(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
     finally:
-        # if os.path.exists(audio_path):
-        #     os.remove(audio_path)
-        #     print(f"Deleted audio file: {audio_path}")
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
+            print(f"Deleted audio file: {audio_path}")
         pass
 
 if __name__ == '__main__':

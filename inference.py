@@ -99,7 +99,9 @@ def segment_by_labels(logits, alignment, labels, tokenizer, blank_id=2):
             return
         ref_logits = logits_np[frames, label_id]
         gop_maxlogit = float(np.max(ref_logits)) if len(ref_logits) > 0 else float('nan')
-        print(f"Appending segment: Label {label_id} from frame {start} to {end}, frame: {frames} (Reference logits: {ref_logits})")
+        # print(f"Appending segment: Label {label_id} from frame {start} to {end}, frame: {frames} (Reference logits: {ref_logits})")
+        # with open("logger.txt","a") as f:
+        #     f.write(f"Appending segment: Label {label_id} from frame {start} to {end}, frame: {frames} (Reference logits: {ref_logits})\n")
         segments.append({
             'label_id': int(label_id),
             'start_frame': start,
@@ -124,7 +126,8 @@ def segment_by_labels(logits, alignment, labels, tokenizer, blank_id=2):
     
     if current_label is not None:
         append_segment(current_label, segment_start, len(alignment))
-    
+    # with open("logger.txt","a") as f:
+    #     f.write(f"Final segments: {segments}\n")
     return segments
 
 def test_pronunciation(audio_path, expected_jyutping, expected_tone):
@@ -142,7 +145,9 @@ def test_pronunciation(audio_path, expected_jyutping, expected_tone):
 
     #alignment and GOP calculation
     jyutping_alignment, dp, backpointer = ctc_viterbi_alignment(torch.tensor(jyutping_logits[0]), jyutping_labels)
-    # print("Jyutping Alignment:", jyutping_alignment)
+    # print("Jyutping Alignment:", jyutping_alignment)  
+    # with open("logger.txt","a") as f:
+    #     f.write(f"Jyutping Alignment: {jyutping_alignment}\n")
     tone_alignment, tone_dp, tone_backpointer = ctc_viterbi_alignment(torch.tensor(tone_logits[0]), tone_tokenizer.encode(tone_labels))
     # print("Tone Alignment:", tone_alignment)
     # gop_maxlogit_jyutping = calculate_gop_maxlogit(torch.tensor(jyutping_logits[0]), jyutping_alignment)
@@ -151,8 +156,8 @@ def test_pronunciation(audio_path, expected_jyutping, expected_tone):
     #segment phonemes and tones
     jyutping_segment = segment_by_labels(torch.tensor(jyutping_logits[0]), jyutping_alignment, jyutping_labels, processor.tokenizer)
     tone_segment = segment_by_labels(torch.tensor(tone_logits[0]), tone_alignment, tone_labels, tone_tokenizer)
-    jyutping_prediction = getPredictions(torch.tensor(jyutping_logits[0]), jyutping_alignment,jyutping_tokenizer,2)
-    tone_prediction = getPredictions(torch.tensor(tone_logits[0]), tone_alignment,tone_tokenizer,1,blank_id=0)
+    jyutping_prediction = getPredictions(torch.tensor(jyutping_logits[0]),jyutping_segment,jyutping_tokenizer,2)
+    tone_prediction = getPredictions(torch.tensor(tone_logits[0]),tone_segment,tone_tokenizer,1,blank_id=2)
     
     #prepare output json
     result_json = {
@@ -164,7 +169,7 @@ def test_pronunciation(audio_path, expected_jyutping, expected_tone):
     }
 
     i = 0
-    for seg in sorted(jyutping_segment, key=lambda x: x['start_frame']):
+    for i,seg in enumerate(sorted(jyutping_segment, key=lambda x: x['start_frame'])):
         score = seg['gop_maxlogit']
         phoneme_data = {
             "id": int(seg['label_id']),
@@ -174,11 +179,11 @@ def test_pronunciation(audio_path, expected_jyutping, expected_tone):
             "duration_ms": seg['duration_frames'] * 10,
             "gop_maxlogit": float(score),
             "confidence": "perfect" if score > PHONEME_THRESHOLD_GOOD else "warning" if score > PHONEME_THRESHOLD_OK else "error",
-            "prediction": jyutping_prediction.get(seg['label_name'], ("unknown", 0.0)),
+            "prediction": jyutping_prediction[i]['predictions'] if jyutping_prediction[i]['predictions'] else [("unknown", 0.0)]
         }
         i += 1
         result_json["phonemes"].append(phoneme_data)
-    for seg in sorted(tone_segment, key=lambda x: x['start_frame']):
+    for i,seg in enumerate(sorted(tone_segment, key=lambda x: x['start_frame'])):
         tone_score = seg['gop_maxlogit']
         tone_data = {
             "id": int(seg['label_id']),
@@ -188,39 +193,49 @@ def test_pronunciation(audio_path, expected_jyutping, expected_tone):
             "duration_ms": seg['duration_frames'] * 10, 
             "gop_maxlogit": float(tone_score),
             "confidence": "perfect" if tone_score > TONE_THRESHOLD_GOOD else "error",
-            "prediction": tone_prediction.get(seg['label_name'], ("unknown", 0.0)),
+            "prediction": tone_prediction[i]['predictions'] if tone_prediction[i]['predictions'] else [("unknown", 0.0)]
         }
         result_json["tones"].append(tone_data)
     return result_json
 
-def getPredictions(logits, alignment,tokenizor,number_of_predictions, blank_id=2):
+def getPredictions(logits, segments, tokenizer, number_of_predictions, blank_id=2):
     logits_np = logits.detach().cpu().numpy() if torch.is_tensor(logits) else np.asarray(logits)
-    vocab_reverse = {v: k for k, v in tokenizor.get_vocab().items()}
-    prediction = {}
-    
-    for label_idx in sorted(np.unique(alignment)):
-        if label_idx == blank_id:
-            continue
-        frames = np.where(alignment == label_idx)[0]
-        if len(frames) == 0:
-            continue
-        allPredictions = {}
-        label_name = vocab_reverse.get(label_idx, f"[{label_idx}]")
+    vocab_reverse = {v: k for k, v in tokenizer.get_vocab().items()}
+    predictions = []
 
-        for t, frame_idx in enumerate(frames, 1):
+    for seg in segments:
+        label_idx = seg['label_id']
+        label_name = seg['label_name']
+        start = seg['start_frame']
+        end = seg['end_frame']
+
+        frames = np.arange(start, end)
+        if len(frames) == 0:
+            predictions.append((label_name, []))
+            continue
+
+        allPredictions = {}
+        for frame_idx in frames:
             frame_logits = logits_np[frame_idx]
             top3_idx = np.argsort(frame_logits)[-3:][::-1]
             for idx in top3_idx:
-                idx_name = vocab_reverse.get(idx, f"unk{idx}")
-                if idx != blank_id and idx != label_idx:
-                # if idx != 2: 
-                    if idx_name not in allPredictions:
-                        allPredictions[idx_name] = float(frame_logits[idx])
-                    else:
-                        allPredictions[idx_name] = max(allPredictions[idx_name], float(frame_logits[idx]))
-        sortedPredictions = sorted(allPredictions.items(), key=lambda x: x[1], reverse=True)
-        prediction[label_name] = sortedPredictions[:number_of_predictions]
-    return prediction
+                if idx == blank_id or idx == label_idx or idx == 0:
+                    continue
+                idx_name = vocab_reverse.get(int(idx), f"unk{idx}")
+                score = float(frame_logits[idx])
+                if idx_name not in allPredictions:
+                    allPredictions[idx_name] = score
+                else:
+                    allPredictions[idx_name] = max(allPredictions[idx_name], score)
+
+        sorted_preds = sorted(allPredictions.items(), key=lambda x: x[1], reverse=True)
+        predictions.append({
+            'label_name': label_name,
+            'label_id': label_idx,
+            'predictions': sorted_preds[:number_of_predictions]
+        })
+
+    return predictions
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
