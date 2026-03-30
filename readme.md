@@ -226,8 +226,7 @@ pip install -r requirements.txt
 
 If you do not have a local GPU, you can verify the ASR-GOP engine and the scoring logic using our Google Colab environment. This demo clones the repository, installs all dependencies, and executes a sample inference to generate the diagnostic JSON payload.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/johneyyauDONTFAIL/cantonese-pronunciation-assessment-system/blob/main/colab_demo.ipynb)
-
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/johneyyauDONTFAIL/cantonese-pronunciation-assessment-system/blob/main/colab_demo.ipynb)
 **Steps to Run:**
 1. Click the badge above to open the notebook.
 2. Select **Runtime > Change runtime type > T4 GPU**.
