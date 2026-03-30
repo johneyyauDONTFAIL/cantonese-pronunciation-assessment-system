@@ -18,23 +18,23 @@ A phoneme-level Cantonese mispronunciation detection and diagnostic feedback sys
 ---
 
 ## System Architecture
-- CityU Metaverse (Unity/Node.js)
-- │ audio + target text (multipart/form-data)
-- ▼
-- Flask REST API (server.py)
-- │
-- ▼
-- Wav2Vec2-BERT ASR Model
-- hon9kon9ize/wav2vec2bert-jyutping
-- │
-- ├── CTC Viterbi Alignment
-- ├── GOP MaxLogit Scoring (phoneme + tone)
-- ├── Second Prediction Retrieval
-- └── JSON Diagnostic Response
-- │
-- ▼
-- CityU Metaverse Frontend
-- (feedback display)
+CityU Metaverse
+│ audio + target text (multipart/form-data)  
+▼  
+Flask REST API (server.py)  
+│  
+▼  
+Wav2Vec2-BERT ASR Model  
+hon9kon9ize/wav2vec2bert-jyutping  
+│  
+├── CTC Viterbi Alignment  
+├── GOP MaxLogit Scoring (phoneme + tone)  
+├── Second Prediction Retrieval  
+└── JSON Diagnostic Response  
+│  
+▼  
+CityU Metaverse Frontend  
+(feedback display)  
 
 ---
 
@@ -210,7 +210,8 @@ cd cantonese-pronunciation-assessment-system
 pip install -r requirements.txt
 ```
 
-> **GPU users:** Install PyTorch with CUDA support first:
+> **GPU users:** Install PyTorch with CUDA support according to your CUDA version first:  
+#### Example  
 > ```bash
 > # CUDA 11.8
 > pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
@@ -218,6 +219,20 @@ pip install -r requirements.txt
 > pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
 > ```
 
+---
+
+---
+## Testing Inference (Google Colab)
+
+If you do not have a local GPU, you can verify the ASR-GOP engine and the scoring logic using our Google Colab environment. This demo clones the repository, installs all dependencies, and executes a sample inference to generate the diagnostic JSON payload.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/johneyyauDONTFAIL/cantonese-pronunciation-assessment-system/blob/main/colab_demo.ipynb)
+
+**Steps to Run:**
+1. Click the badge above to open the notebook.
+2. Select **Runtime > Change runtime type > T4 GPU**.
+3. Run all cells (`Ctrl + F9`).
+4. The output will display the output JSON.
 ---
 
 ## Usage
@@ -232,15 +247,19 @@ Server runs on `http://localhost:5000` by default.
 ```bash
 python inference.py "audio_path" "expected_text"
 ```
+#### Example
+```bash
+python inference.py ./audio/城大.wav "城大"
+```
 
-### Run Frontend webpage for integration demo
+### Run Frontend webpage for better visualization of result
 ```bash
 python -m http.server 8000
 ```
 Then go to 127.0.0.1:8000. A webpage should be opened which allow you to record a wav audio and type in expected words. Then you can click evaluate to send the request to the backend and wait for the result.
 
 ## Project Structure
-fyp/  
+cantonese-pronunciation-assessment-system/  
 ├── model.py # Wav2Vec2BertForCantonese model class  
 ├── inference.py # test_pronunciation pipeline (alignment + GOP + feedback)  
 ├── server.py # Flask REST API server  
@@ -250,14 +269,16 @@ fyp/
 ├── evaluate.py # CER/WER and latency benchmarking  
 ├── vocab.json # Jyutping phoneme tokenizer vocabulary  
 ├── tone_vocab.json # Tone tokenizer vocabulary  
-├── cantonese_jyutping.json # Cantonese dictionary for translating chinese characters to jyutping  
+├── cantonese_jyutping.json # Cantonese dictionary for translating chinese expected text to jyutping for inference.py  
+├── README.me # This file  
+├── colab_demo # A demo on colab for the main function in inference.py  
 └── requirements.txt # pip package needed
 
 ---
 
 ## Performance
 
-Benchmarked on 60 audio samples (~3.11s average duration):
+Benchmarked on 60 audio samples:
 
 | Metric | GTX 1660 Ti | Google Colab (T4 GPU) |  
 | Mean Latency | 21.6 s | 122.5 ms |  
