@@ -1,0 +1,13 @@
+# Audio processing and Transformer models packages
+torch
+torchaudio
+transformers>=4.34.0
+accelerate
+numpy
+librosa
+soundfile
+pycantonese
+
+# Flask and CORS for the backend server
+flask
+flask-cors
