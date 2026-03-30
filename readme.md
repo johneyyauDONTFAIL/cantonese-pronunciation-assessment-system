@@ -198,19 +198,20 @@ expected_text: 城大
 ---
 
 ## Installation
+### 1. System Requirements
+Before proceeding, ensure your environment meets the following criteria:  
+* **Python:** 3.10.x (Recommended for library compatibility)  
+* **FFmpeg:** Required for audio decoding and processing.  
+* **GPU:** NVIDIA GPU with 8GB+ VRAM (Optional, but required for <200ms latency).  
 
-### 1. Clone the repository
+### 2. Clone the repository
 ```bash
 git clone https://github.com/johneyyauDONTFAIL/cantonese-pronunciation-assessment-system.git
 cd cantonese-pronunciation-assessment-system
 ```
 
-### 2. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-> **GPU users:** Install PyTorch with CUDA support according to your CUDA version first:  
+### 3. Install dependencies
+> **GPU users:** Install PyTorch with CUDA support according to your CUDA version first:    
 #### Example  
 > ```bash
 > # CUDA 11.8
@@ -218,6 +219,10 @@ pip install -r requirements.txt
 > # CUDA 12.1
 > pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
 > ```
+
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
